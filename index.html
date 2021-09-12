@@ -99,86 +99,30 @@
                     </div>
                 </sm-carousel>-->
                <br> 
-               
-               <sm-form ><br><br>
+                </div>
+               <sm-form class="block"><br><br>
                 <h1 align="center" style="text-decoration:underline;">Merkle Tree</h1><br>
-                    <sm-input placeholder="Enter Transaction id's separated by comma(,) " style="width: 50%;" id="trid"></sm-input>
-                    <sm-button variant="primary" style="width: 20%;" id="trbtn" onclick="trbtn()">CREATE</sm-button>
+                    <sm-input placeholder="Enter Transaction id's separated by comma(,) "  id="trid" ></sm-input>
+                    <sm-button variant="primary" id="trbtn">CREATE</sm-button>
                 </sm-form>
+                <div class="block">
+                    <div class="otpstyle">
                 <div id="otp"></div>
+                </div>
                <!-- <label id="minutes">00</label>:<label id="seconds">00</label> -->
                 <div id="waiting"></div>
-                <script>
+                </div><br><br>
+
+                <div>
+                    <sm-form>
+                        <sm-input placeholder="Enter the element to get 'Path'" id="path"></sm-input>
+                        <sm-button variant="primary" id="getpath">REQUEST</sm-button>
+                    </sm-form>
+                        <div class="otpstyle">
+                        <div id="otp1"></div>
+                    </div>
                     
-                    function trbtn(){
-                        document.getElementById("otp").innerHTML="<br><span class='spinner'><sm-spinner></sm-spinner></span><br>";
-                       document.getElementById("waiting").innerHTML="<br>Please wait until the tree is constructed!!<br>Tree will be constructed within 5minutes!!"
-                      /*  var minutesLabel = document.getElementById("minutes");
-                        var secondsLabel = document.getElementById("seconds");
-                        var totalSeconds = 0;
-                        while(totalSeconds<300){
-
-                        setInterval(setTime, 1000);
-                        function setTime() {
-                        ++totalSeconds;
-                        secondsLabel.innerHTML = pad(totalSeconds % 60);
-                        minutesLabel.innerHTML = pad(parseInt(totalSeconds / 60));
-                        }
-
-                        function pad(val) {
-                        var valString = val + "";
-                        if (valString.length < 2) {
-                            return "0" + valString;
-                        } else {
-                            return valString;
-                        }
-                        }}*/
-                        let flag=0;
-                        let i=0;
-                      
-                        var minutesToAdd=60;
-                        currentDate=new Date()
-                        futureDate = new Date(currentDate.getTime() + minutesToAdd*1000);
-                        setTimeout(()=>{if(futureDate<=new Date())
-                        {
-                            flag=1;
-                            if(flag==1){
-                        let trid=document.getElementById("trid").value;
-                        let trlist=trid.split(",");
-                        tree=new MerkleTree(trlist);
-                        tree.createTree();
-                        rootHash=tree.getRootHash();
-                        document.getElementById("waiting").innerHTML=" ";
-                        document.getElementById("otp").innerHTML="<br><b>Root : </b>"+rootHash;
-                        }
-                        }else{
-                            flag=0;
-                        }
-                        },60000);
-
-                        let trid=document.getElementById("trid").value;
-                        let trlist=trid.split(",");
-                        if(trlist.length=="6"){
-                            flag=1;
-                            if(flag==1){
-                        let trid=document.getElementById("trid").value;
-                        let trlist=trid.split(",");
-                        tree=new MerkleTree(trlist);
-                        tree.createTree();
-                        rootHash=tree.getRootHash();
-                        document.getElementById("waiting").innerHTML=" ";
-                        document.getElementById("otp").innerHTML="<br><b>Root : </b>"+rootHash;
-                        }
-                        }
-
-
-
-                    }
-                
-
-
-
-                </script>
+                </div><br><br><br>
             </section>
             <section class="section">
                 <div class="section__header">
@@ -224,7 +168,7 @@
         </sm-tab-panels>
     </article>
 
-          
+       <!--create_verify_merkle-->   
     <script>
       
         function show_rootHash()
@@ -251,7 +195,9 @@
           verification=tree.verifyMerkleMembership(element,root_Hash,path);
           document.getElementById("display_verification").innerHTML=verification;
         }
+        
         </script>
+        <!--merkle tree required-->
     <script>
 
 
@@ -871,7 +817,7 @@
   
   
   </script>
-  
+    <script src="js/script.js"></script>
     <script src="js/main_UI.js"></script>
     <script src="js/components.min.js"></script>
     <script id="floGlobals">

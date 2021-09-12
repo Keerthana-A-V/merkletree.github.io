@@ -1,14 +1,51 @@
 .spinner{
-    margin-left:50px;
+    margin-left:25%;
+    float: left;
 }
 #waiting{
-    margin-left: 60px;
+    margin-left: 35%;
     font-weight: bold;
     color: gray;
 }
 sm-input{
-    margin-left: 30%;
+    margin-left: 25%;
+    width: 50%;
 }
 sm-button{
-    margin-left: 42%;
+    margin-left: 38%;
+    width: 20%;
+}
+.block{
+    display:block;
+}
+#otp{
+    margin-left: 27%;
+}
+.otpstyle{
+    color: gray;
+    font-weight: bold;
+}
+#otp1{
+    margin-left: 15%;
+    margin-right: 15%;
+}
+
+@media screen and (max-width:900px){
+    sm-button{
+        width:fit-content;
+
+    }
+    sm-input{
+        width:100%;
+        margin-left: 0;
+    }
+    .spinner{
+        margin-left:0;
+        float: left;
+    }
+    #waiting{
+        margin-left:0;
+        font-weight: bold;
+        color: gray;
+    }
 }
