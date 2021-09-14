@@ -25,6 +25,10 @@ sm-button{
     color: gray;
     font-weight: bold;
 }
+#otp2{
+    margin-left: 28%;
+    margin-right: 28%;
+}
 
 
 @media screen and (max-width:900px){

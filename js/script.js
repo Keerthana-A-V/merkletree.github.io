@@ -87,7 +87,22 @@ path=new Array();
                  id1.appendChild(newdiv);
         }
     }
+    //verify path
 
+document.getElementById("vrbtn").addEventListener('click',()=>{
+    let roothash=document.getElementById("roothash").value;
+    let ele=document.getElementById("ele").value;
+    path_string=document.getElementById("path11").value;
+    path1=path_string.split(',')
+    let verification=tree.verifyMerkleMembership(ele,roothash,path1);
+    if(verification==true){
+        document.getElementById("otp2").innerHTML="<br><b style='color:black'>TRUE!, '"+ele+"' is PRESENT in</b>' "+roothash+" ' !";
+    }
+    else{
+        document.getElementById("otp2").innerHTML="<br><b style='color:black'>FALSE!, ' "+ele+" ' is NOT PRESENT in</b> ' "+roothash+" ' !";
+
+    }
+})
 
 
 
