@@ -14,7 +14,7 @@
         <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body data-theme="light" class="hide-completely">
+<body data-theme="light" class="hide-completely" onload="onLoadStartUp()">
     <sm-notifications id="notification_drawer"></sm-notifications>
     <audio id="notification_sound">
         <source src="https://rmservices.duckdns.org/files/notification-sound.mp3" type="audio/mpeg">
@@ -170,35 +170,6 @@
         </sm-tab-panels>
     </article>
 
-       <!--create_verify_merkle-->   
-    <script>
-      
-        function show_rootHash()
-        {
-           elements_string=document.getElementById("elements").value
-           elements_array=elements_string.split(',')
-           tree=new MerkleTree(elements_array);
-           tree.createTree();
-           rootHash=tree.getRootHash();
-             document.getElementById("display_RootHash").innerHTML=rootHash;
-        
-        }
-        function show_Path()
-        {
-          path=tree.getHashPathToRoot(document.getElementById("element").value);
-          document.getElementById("display_path").innerHTML=path;
-        }
-        function verify_element()
-        {
-          path_string=document.getElementById("path").value;
-          path=path_string.split(',')
-          element=document.getElementById("element_to_be_verified").value
-          root_Hash=document.getElementById("rootHash").value
-          verification=tree.verifyMerkleMembership(element,root_Hash,path);
-          document.getElementById("display_verification").innerHTML=verification;
-        }
-        
-        </script>
         <!--merkle tree required-->
     <script>
 
@@ -8843,794 +8814,819 @@
             }
         }
     </script>
-    <script id="floCloudAPI" version="2.0.2e">
-        /* FLO Cloud operations to send/request application data*/
-        const floCloudAPI = {
+<script id="floCloudAPI" version="2.1.0">
+    /* FLO Cloud operations to send/request application data*/
+    const floCloudAPI = {
 
-            util: {
+        util: {
 
-                kBucket: {
-                    SNKB: null,
-                    SNCO: null,
+            kBucket: {
+                SNKB: null,
+                SNCO: null,
 
-                    util: {
-                        decodeID(floID) {
-                            let k = bitjs.Base58.decode(floID)
-                            k.shift()
-                            k.splice(-4, 4)
-                            const decodedId = Crypto.util.bytesToHex(k);
-                            const nodeIdBigInt = new BigInteger(decodedId, 16);
-                            const nodeIdBytes = nodeIdBigInt.toByteArrayUnsigned();
-                            const nodeIdNewInt8Array = new Uint8Array(nodeIdBytes);
-                            return nodeIdNewInt8Array;
-                        },
-
-                        addNode: function (floID, KB) {
-                            let decodedId = this.decodeID(floID);
-                            const contact = {
-                                id: decodedId,
-                                floID: floID
-                            };
-                            KB.add(contact)
-                        },
-
-                        removeNode: function (floID, KB) {
-                            let decodedId = this.decodeID(floID);
-                            KB.remove(decodedId)
-                        },
-
-                        isPresent: function (floID, KB) {
-                            let kArray = KB.toArray().map(k => k.floID);
-                            return kArray.includes(floID)
-                        },
-
-                        distanceOf: function (floID, KB) {
-                            let decodedId = this.decodeID(floID);
-                            return KB.distance(KB.localNodeId, decodedId);
-                        },
-
-                        closestOf: function (floID, n, KB) {
-                            let decodedId = this.decodeID(floID);
-                            return KB.closest(decodedId, n)
-                        },
-
-                        constructKB: function (list, refID) {
-                            const KBoptions = {
-                                localNodeId: this.decodeID(refID)
-                            };
-                            let KB = new BuildKBucket(KBoptions);
-                            for (let id of list)
-                                this.addNode(id, KB)
-                            return KB;
-                        }
+                util: {
+                    decodeID(floID) {
+                        let k = bitjs.Base58.decode(floID)
+                        k.shift()
+                        k.splice(-4, 4)
+                        const decodedId = Crypto.util.bytesToHex(k);
+                        const nodeIdBigInt = new BigInteger(decodedId, 16);
+                        const nodeIdBytes = nodeIdBigInt.toByteArrayUnsigned();
+                        const nodeIdNewInt8Array = new Uint8Array(nodeIdBytes);
+                        return nodeIdNewInt8Array;
                     },
 
-                    launch: function () {
-                        return new Promise((resolve, reject) => {
-                            try {
-                                let superNodeList = Object.keys(floGlobals.supernodes);
-                                let masterID = floGlobals.SNStorageID;
-                                this.SNKB = this.util.constructKB(superNodeList, masterID);
-                                this.SNCO = superNodeList.map(sn => [this.util.distanceOf(sn, this.SNKB),
+                    addNode: function(floID, KB) {
+                        let decodedId = this.decodeID(floID);
+                        const contact = {
+                            id: decodedId,
+                            floID: floID
+                        };
+                        KB.add(contact)
+                    },
+
+                    removeNode: function(floID, KB) {
+                        let decodedId = this.decodeID(floID);
+                        KB.remove(decodedId)
+                    },
+
+                    isPresent: function(floID, KB) {
+                        let kArray = KB.toArray().map(k => k.floID);
+                        return kArray.includes(floID)
+                    },
+
+                    distanceOf: function(floID, KB) {
+                        let decodedId = this.decodeID(floID);
+                        return KB.distance(KB.localNodeId, decodedId);
+                    },
+
+                    closestOf: function(floID, n, KB) {
+                        let decodedId = this.decodeID(floID);
+                        return KB.closest(decodedId, n)
+                    },
+
+                    constructKB: function(list, refID) {
+                        const KBoptions = {
+                            localNodeId: this.decodeID(refID)
+                        };
+                        let KB = new BuildKBucket(KBoptions);
+                        for (let id of list)
+                            this.addNode(id, KB)
+                        return KB;
+                    }
+                },
+
+                launch: function() {
+                    return new Promise((resolve, reject) => {
+                        try {
+                            let superNodeList = Object.keys(floGlobals.supernodes);
+                            let masterID = floGlobals.SNStorageID;
+                            this.SNKB = this.util.constructKB(superNodeList, masterID);
+                            this.SNCO = superNodeList.map(sn => [this.util.distanceOf(sn, this.SNKB),
                                     sn
                                 ])
-                                    .sort((a, b) => a[0] - b[0])
-                                    .map(a => a[1])
-                                resolve('Supernode KBucket formed');
-                            } catch (error) {
-                                reject(error);
-                            }
-                        });
-                    },
-
-                    innerNodes: function (id1, id2) {
-                        if (!this.SNCO.includes(id1) || !this.SNCO.includes(id2))
-                            throw Error('Given nodes are not supernode');
-                        let iNodes = []
-                        for (let i = this.SNCO.indexOf(id1) + 1; this.SNCO[i] != id2; i++) {
-                            if (i < this.SNCO.length)
-                                iNodes.push(this.SNCO[i])
-                            else i = -1
+                                .sort((a, b) => a[0] - b[0])
+                                .map(a => a[1])
+                            resolve('Supernode KBucket formed');
+                        } catch (error) {
+                            reject(error);
                         }
-                        return iNodes
-                    },
+                    });
+                },
 
-                    outterNodes: function (id1, id2) {
-                        if (!this.SNCO.includes(id1) || !this.SNCO.includes(id2))
-                            throw Error('Given nodes are not supernode');
-                        let oNodes = []
-                        for (let i = this.SNCO.indexOf(id2) + 1; this.SNCO[i] != id1; i++) {
-                            if (i < this.SNCO.length)
-                                oNodes.push(this.SNCO[i])
-                            else i = -1
-                        }
-                        return oNodes
-                    },
-
-                    prevNode: function (id, N = 1) {
-                        let n = N || this.SNCO.length;
-                        if (!this.SNCO.includes(id))
-                            throw Error('Given node is not supernode');
-                        let pNodes = []
-                        for (let i = 0, j = this.SNCO.indexOf(id) - 1; i < n; j--) {
-                            if (j == this.SNCO.indexOf(id))
-                                break;
-                            else if (j > -1)
-                                pNodes[i++] = this.SNCO[j]
-                            else j = this.SNCO.length
-                        }
-                        return (N == 1 ? pNodes[0] : pNodes)
-                    },
-
-                    nextNode: function (id, N = 1) {
-                        let n = N || this.SNCO.length;
-                        if (!this.SNCO.includes(id))
-                            throw Error('Given node is not supernode');
-                        if (!n) n = this.SNCO.length;
-                        let nNodes = []
-                        for (let i = 0, j = this.SNCO.indexOf(id) + 1; i < n; j++) {
-                            if (j == this.SNCO.indexOf(id))
-                                break;
-                            else if (j < this.SNCO.length)
-                                nNodes[i++] = this.SNCO[j]
-                            else j = -1
-                        }
-                        return (N == 1 ? nNodes[0] : nNodes)
-                    },
-
-                    closestNode: function (id, N = 1) {
-                        let decodedId = this.util.decodeID(id);
-                        let n = N || this.SNCO.length;
-                        let cNodes = this.SNKB.closest(decodedId, n)
-                            .map(k => k.floID)
-                        return (N == 1 ? cNodes[0] : cNodes)
+                innerNodes: function(id1, id2) {
+                    if (!this.SNCO.includes(id1) || !this.SNCO.includes(id2))
+                        throw Error('Given nodes are not supernode');
+                    let iNodes = []
+                    for (let i = this.SNCO.indexOf(id1) + 1; this.SNCO[i] != id2; i++) {
+                        if (i < this.SNCO.length)
+                            iNodes.push(this.SNCO[i])
+                        else i = -1
                     }
+                    return iNodes
                 },
 
-                inactive: new Set(),
-                connect(snID) {
-                    return new Promise((resolve, reject) => {
-                        if (!(snID in floGlobals.supernodes))
-                            return reject(`${snID} is not a supernode`)
-                        let inactive = this.inactive
-                        if (inactive.has(snID))
-                            return reject(`${snID} is not active`)
-                        var wsConn = new WebSocket("wss://" + floGlobals.supernodes[snID].uri + "/ws");
-                        wsConn.onmessage = (evt) => {
-                            if (evt.data == '$+')
-                                resolve(wsConn)
-                            else if (evt.data == '$-') {
-                                wsConn.close();
-                                inactive.add(snID)
-                                reject(`${snID} is not active`)
-                            }
-                        }
-                        wsConn.onerror = evt => {
-                            inactive.add(snID)
-                            reject(`${snID} is unavailable`)
-                        }
-                    })
+                outterNodes: function(id1, id2) {
+                    if (!this.SNCO.includes(id1) || !this.SNCO.includes(id2))
+                        throw Error('Given nodes are not supernode');
+                    let oNodes = []
+                    for (let i = this.SNCO.indexOf(id2) + 1; this.SNCO[i] != id1; i++) {
+                        if (i < this.SNCO.length)
+                            oNodes.push(this.SNCO[i])
+                        else i = -1
+                    }
+                    return oNodes
                 },
 
-                connectActive(snID, reverse = false) {
-                    return new Promise((resolve, reject) => {
-                        if (this.inactive.size === this.kBucket.SNCO.length)
-                            return reject('Cloud offline')
-                        if (!(snID in floGlobals.supernodes))
-                            snID = this.kBucket.closestNode(snID);
-                        this.connect(snID)
-                            .then(node => resolve(node))
+                prevNode: function(id, N = 1) {
+                    let n = N || this.SNCO.length;
+                    if (!this.SNCO.includes(id))
+                        throw Error('Given node is not supernode');
+                    let pNodes = []
+                    for (let i = 0, j = this.SNCO.indexOf(id) - 1; i < n; j--) {
+                        if (j == this.SNCO.indexOf(id))
+                            break;
+                        else if (j > -1)
+                            pNodes[i++] = this.SNCO[j]
+                        else j = this.SNCO.length
+                    }
+                    return (N == 1 ? pNodes[0] : pNodes)
+                },
+
+                nextNode: function(id, N = 1) {
+                    let n = N || this.SNCO.length;
+                    if (!this.SNCO.includes(id))
+                        throw Error('Given node is not supernode');
+                    if (!n) n = this.SNCO.length;
+                    let nNodes = []
+                    for (let i = 0, j = this.SNCO.indexOf(id) + 1; i < n; j++) {
+                        if (j == this.SNCO.indexOf(id))
+                            break;
+                        else if (j < this.SNCO.length)
+                            nNodes[i++] = this.SNCO[j]
+                        else j = -1
+                    }
+                    return (N == 1 ? nNodes[0] : nNodes)
+                },
+
+                closestNode: function(id, N = 1) {
+                    let decodedId = this.util.decodeID(id);
+                    let n = N || this.SNCO.length;
+                    let cNodes = this.SNKB.closest(decodedId, n)
+                        .map(k => k.floID)
+                    return (N == 1 ? cNodes[0] : cNodes)
+                }
+            },
+
+            inactive: new Set(),
+
+            ws_connect(snID) {
+                return new Promise((resolve, reject) => {
+                    if (!(snID in floGlobals.supernodes))
+                        return reject(`${snID} is not a supernode`)
+                    let inactive = this.inactive
+                    if (inactive.has(snID))
+                        return reject(`${snID} is not active`)
+                    var wsConn = new WebSocket("wss://" + floGlobals.supernodes[snID].uri + "/");
+                    wsConn.onopen = evt => resolve(wsConn);
+                    wsConn.onerror = evt => {
+                        inactive.add(snID)
+                        reject(`${snID} is unavailable`)
+                    }
+                })
+            },
+
+            ws_activeConnect(snID, reverse = false) {
+                return new Promise((resolve, reject) => {
+                    if (this.inactive.size === this.kBucket.SNCO.length)
+                        return reject('Cloud offline');
+                    if (!(snID in floGlobals.supernodes))
+                        snID = this.kBucket.closestNode(snID);
+                    this.ws_connect(snID)
+                        .then(node => resolve(node))
+                        .catch(error => {
+                            if (reverse)
+                                var nxtNode = this.kBucket.prevNode(snID);
+                            else
+                                var nxtNode = this.kBucket.nextNode(snID);
+                            this.ws_activeConnect(nxtNode, reverse)
+                                .then(node => resolve(node))
+                                .catch(error => reject(error))
+                        })
+                })
+            },
+
+            fetch_API: function(snID, data) {
+                return new Promise((resolve, reject) => {
+                    if (this.inactive.has(snID))
+                        return reject(`${snID} is not active`);
+                    let fetcher, sn_url = "https://" + floGlobals.supernodes[snID].uri;
+                    if (typeof data === "string")
+                        fetcher = fetch(sn_url + "?" + data);
+                    else if (typeof data === "object" && data.method === "POST")
+                        fetcher = fetch(sn_url, data);
+                    fetcher.then(response => {
+                        if (response.ok)
+                            resolve(response);
+                        else
+                            reject(response);
+                    }).catch(error => reject(error))
+                })
+            },
+
+            fetch_ActiveAPI: function(snID, data, reverse = false) {
+                return new Promise((resolve, reject) => {
+                    if (this.inactive.size === this.kBucket.SNCO.length)
+                        return reject('Cloud offline');
+                    if (!(snID in floGlobals.supernodes))
+                        snID = this.kBucket.closestNode(snID);
+                    this.fetch_API(snID, data)
+                        .then(result => resolve(result))
+                        .catch(error => {
+                            this.inactive.add(snID)
+                            if (reverse)
+                                var nxtNode = this.kBucket.prevNode(snID);
+                            else
+                                var nxtNode = this.kBucket.nextNode(snID);
+                            this.fetch_ActiveAPI(nxtNode, data, reverse)
+                                .then(result => resolve(result))
+                                .catch(error => reject(error));
+                        })
+                })
+            },
+
+            singleRequest: function(floID, data_obj, method = "POST") {
+                return new Promise((resolve, reject) => {
+                    let data;
+                    if (method === "POST")
+                        data = {
+                            method: "POST",
+                            body: JSON.stringify(data_obj)
+                        };
+                    else
+                        data = new URLSearchParams(JSON.parse(JSON.stringify(data_obj))).toString();
+                    this.fetch_ActiveAPI(floID, data).then(response => {
+                        response.json()
+                            .then(result => resolve(this.objectifier(result)))
                             .catch(error => {
-                                if (reverse)
-                                    var nxtNode = this.kBucket.prevNode(snID);
-                                else
-                                    var nxtNode = this.kBucket.nextNode(snID);
-                                this.connectActive(nxtNode, reverse)
-                                    .then(node => resolve(node))
+                                response.text()
+                                    .then(result => reject(result)) //Error Message from Node
                                     .catch(error => reject(error))
                             })
-                    })
-                },
-
-                singleRequest: function (floID, data) {
-                    return new Promise((resolve, reject) => {
-                        this.connectActive(floID).then(node => {
-                            let randID = floCrypto.randString(5);
-                            node.send(`${floID}|${randID}:${JSON.stringify(data)}`);
-                            node.onmessage = (evt) => {
-                                if (evt.data.startsWith(randID, 1)) {
-                                    try {
-                                        let data = JSON.parse(evt.data.substring(42))
-                                        resolve(data)
-                                    } catch (error) {
-                                        reject(evt.data.substring(42))
-                                    } finally {
-                                        node.close()
-                                    }
-                                }
-                            }
-                        }).catch(error => reject(error));
-                    });
-                },
-
-                liveRequest: function (floID, datareq, callback) {
-                    let request = {
-                        ...datareq.request
-                    };
-                    const checkFilter = (v, d, r) =>
-                        (!r.atVectorClock || r.atVectorClock == v) &&
-                        (r.atVectorClock || !r.lowerVectorClock || r.lowerVectorClock <= v) &&
-                        (r.atVectorClock || !r.upperVectorClock || r.upperVectorClock >= v) &&
-                        r.application == d.application &&
-                        r.receiverID == d.receiverID &&
-                        (!r.comment || r.comment == d.comment) &&
-                        (!r.type || r.type == d.type) &&
-                        (!r.senderIDs || r.senderIDs.includes(d.senderID));
-                    return new Promise((resolve, reject) => {
-                        this.connectActive(floID).then(node => {
-                            let randID = floCrypto.randString(5);
-                            node.send(`${floID}|${randID}:${JSON.stringify(datareq)}`);
-                            node.onmessage = (evt) => {
-                                if (evt.data.startsWith(randID, 1))
-                                    var i = 42
-                                else if (evt.data.startsWith(floID, 1))
-                                    var i = 36
-                                else return;
-                                let d = e = null;
-                                try {
-                                    let data = JSON.parse(evt.data.substring(i))
-                                    let filter = {}
-                                    for (let v in data)
-                                        if (checkFilter(v, data[v], request))
-                                            filter[v] = data[v]
-                                    d = filter
-                                } catch (error) {
-                                    e = evt.data.substring(i)
-                                } finally {
-                                    callback(d, e)
-                                }
-                            }
-                            this.liveRequest[randID] = node;
-                            this.liveRequest[randID].request = request;
-                            resolve(randID)
-                        }).catch(error => reject(error));
-                    });
-                },
-
-                encodeMessage: function (message) {
-                    return btoa(unescape(encodeURIComponent(JSON.stringify(message))))
-                },
-
-                decodeMessage: function (message) {
-                    return JSON.parse(decodeURIComponent(escape(atob(message))))
-                },
-
-                filterKey: function (type, options) {
-                    return type + (options.comment ? ':' + options.comment : '') +
-                        '|' + (options.receiverID || floGlobals.adminID) +
-                        '|' + (options.application || floGlobals.application);
-                },
-
-                lastCommit: function (method, objName) {
-                    switch (method) {
-                        case "GET":
-                            return JSON.parse(this.lastCommit[objName]);
-                        case "SET":
-                            this.lastCommit[objName] = JSON.stringify(floGlobals.appObjects[objName]);
-                    }
-                },
-
-                updateObject: function (dataSet) {
-                    try {
-                        console.log(dataSet)
-                        let updatedObjects = new Set()
-                        for (vc in dataSet) {
-                            switch (dataSet[vc].comment) {
-                                case "RESET":
-                                    if (dataSet[vc].message.reset)
-                                        floGlobals.appObjects[dataSet[vc].type] = dataSet[vc].message.reset;
-                                    break;
-                                case "UPDATE":
-                                    if (dataSet[vc].message.update)
-                                        floGlobals.appObjects[dataSet[vc].type] = mergeDiff(floGlobals
-                                            .appObjects[dataSet[vc].type], message.diff)
-                            }
-                            floGlobals.lastVC[dataSet[vc].type] = vc;
-                            updatedObjects.add(dataSet[vc].type)
-                        }
-                        updatedObjects.forEach(o => {
-                            compactIDB.writeData("appObjects", floGlobals.appObjects[o], o)
-                            compactIDB.writeData("lastVC", floGlobals.lastVC[o], o)
-                        });
-                    } catch (error) {
-                        console.error(error)
-                    }
-                },
-
-                storeGeneral: function (fk, dataSet) {
-                    try {
-                        console.log(dataSet)
-                        if (typeof floGlobals.generalData[fk] !== "object")
-                            floGlobals.generalData[fk] = {}
-                        for (let vc in dataSet)
-                            floGlobals.generalData[fk][vc] = dataSet[vc];
-                        floGlobals.lastVC[fk] = Object.keys(floGlobals.generalData[fk]).sort().pop()
-                        compactIDB.writeData("lastVC", floGlobals.lastVC[fk], fk)
-                        compactIDB.writeData("generalData", floGlobals.generalData[fk], fk)
-                    } catch (error) {
-                        console.error(error)
-                    }
-                }
-            },
-
-            //send Any message to supernode cloud storage
-            sendApplicationData: function (message, type, options = {}) {
-                return new Promise((resolve, reject) => {
-                    var data = {
-                        senderID: myFloID,
-                        receiverID: options.receiverID || floGlobals.adminID,
-                        pubKey: myPubKey,
-                        message: this.util.encodeMessage(message),
-                        time: Date.now(),
-                        application: options.application || floGlobals.application,
-                        type: type,
-                        comment: options.comment || ""
-                    }
-                    let hashcontent = ["receiverID", "time", "application", "type", "message", "comment"]
-                        .map(d => data[d]).join("|")
-                    data.sign = floCrypto.signData(hashcontent, myPrivKey)
-                    this.util.singleRequest(data.receiverID, data)
-                        .then(result => {
-                            data.message = message
-                            resolve({
-                                [result.vectorClock]: data
-                            })
-                        }).catch(error => reject(error))
-                })
-            },
-
-            //request any data from supernode cloud
-            requestApplicationData: function (type, options = {}) {
-                return new Promise((resolve, reject) => {
-                    var request = {
-                        receiverID: options.receiverID || floGlobals.adminID,
-                        senderIDs: options.senderIDs || undefined,
-                        application: options.application || floGlobals.application,
-                        type: type,
-                        comment: options.comment || undefined,
-                        lowerVectorClock: options.lowerVectorClock || undefined,
-                        upperVectorClock: options.upperVectorClock || undefined,
-                        atVectorClock: options.atVectorClock || undefined,
-                        mostRecent: options.mostRecent || undefined,
-                    }
-                    var datareq = {
-                        time: Date.now(),
-                        request
-                    }
-                    if (options.callback instanceof Function) {
-                        let callback = (d, e) => {
-                            for (let v in d)
-                                d[v].message = this.util.decodeMessage(d[v].message)
-                            options.callback(d, e)
-                        }
-                        this.util.liveRequest(request.receiverID, datareq, callback)
-                            .then(result => resolve(result))
-                            .catch(error => reject(error))
-                    } else {
-                        this.util.singleRequest(request.receiverID, datareq).then(data => {
-                            for (let v in data)
-                                data[v].message = this.util.decodeMessage(data[v].message)
-                            resolve(data)
-                        }).catch(error => reject(error))
-                    }
-                })
-            },
-
-            //delete data from supernode cloud (received only)
-            deleteApplicationData: function (vectorClocks, options = {}) {
-                return new Promise((resolve, reject) => {
-                    var delreq = {
-                        requestorID: myFloID,
-                        pubKey: myPubKey,
-                        time: Date.now(),
-                        delete: (Array.isArray(vectorClocks) ? vectorClocks : [vectorClocks]),
-                        application: options.application || floGlobals.application
-                    }
-                    let hashcontent = ["time", "application", "delete"]
-                        .map(d => delreq[d]).join("|")
-                    delreq.sign = floCrypto.signData(hashcontent, myPrivKey)
-                    this.util.singleRequest(delreq.requestorID, delreq).then(result => {
-                        let success = [],
-                            failed = [];
-                        result.forEach(r => r.status === 'fulfilled' ?
-                            success.push(r.value) : failed.push(r.reason));
-                        resolve({
-                            success,
-                            failed
-                        })
                     }).catch(error => reject(error))
                 })
             },
 
-            //edit comment of data in supernode cloud (mutable comments only)
-            editApplicationData: function (vectorClock, newComment, oldData, options = {}) {
+            liveRequest: function(floID, request, callback) {
+                const checkFilter = (v, d, r) =>
+                    (!r.atVectorClock || r.atVectorClock == v) &&
+                    (r.atVectorClock || !r.lowerVectorClock || r.lowerVectorClock <= v) &&
+                    (r.atVectorClock || !r.upperVectorClock || r.upperVectorClock >= v) &&
+                    r.application == d.application &&
+                    r.receiverID == d.receiverID &&
+                    (!r.comment || r.comment == d.comment) &&
+                    (!r.type || r.type == d.type) &&
+                    (!r.senderIDs || r.senderIDs.includes(d.senderID));
                 return new Promise((resolve, reject) => {
-                    let p0
-                    if (!oldData) {
-                        options.atVectorClock = vectorClock;
-                        options.callback = false;
-                        p0 = this.requestApplicationData(false, options)
-                    } else
-                        p0 = Promise.resolve({
-                            vectorClock: {
-                                ...oldData
-                            }
-                        })
-                    p0.then(d => {
-                        if (d.senderID != myFloID)
-                            return reject("Invalid requestorID")
-                        else if (!d.comment.startsWith("EDIT:"))
-                            return reject("Data immutable")
-                        let data = {
-                            requestorID: myFloID,
-                            receiverID: d.receiverID,
-                            time: Date.now(),
-                            application: d.application,
-                            edit: {
-                                vectorClock: vectorClock,
-                                comment: newComment
+                    this.ws_activeConnect(floID).then(node => {
+                        let randID = floCrypto.randString(5);
+                        node.send(JSON.stringify(request));
+                        node.onmessage = (evt) => {
+                            let d = e = null;
+                            try {
+                                let data = this.objectifier(JSON.parse(evt.data)),
+                                    filter = {};
+                                for (let v in data)
+                                    if (checkFilter(v, data[v], request))
+                                        filter[v] = data[v];
+                                d = filter;
+                            } catch (error) {
+                                e = evt.data
+                            } finally {
+                                callback(d, e)
                             }
                         }
-                        d.comment = data.edit.comment;
-                        let hashcontent = ["receiverID", "time", "application", "type", "message",
+                        this.liveRequest[randID] = node;
+                        this.liveRequest[randID].request = request;
+                        resolve(randID)
+                    }).catch(error => reject(error));
+                });
+            },
+
+            encodeMessage: function(message) {
+                return btoa(unescape(encodeURIComponent(JSON.stringify(message))))
+            },
+
+            decodeMessage: function(message) {
+                return JSON.parse(decodeURIComponent(escape(atob(message))))
+            },
+
+            filterKey: function(type, options) {
+                return type + (options.comment ? ':' + options.comment : '') +
+                    '|' + (options.receiverID || floGlobals.adminID) +
+                    '|' + (options.application || floGlobals.application);
+            },
+
+            lastCommit: function(method, objName) {
+                switch (method) {
+                    case "GET":
+                        return JSON.parse(this.lastCommit[objName]);
+                    case "SET":
+                        this.lastCommit[objName] = JSON.stringify(floGlobals.appObjects[objName]);
+                }
+            },
+
+            updateObject: function(dataSet) {
+                try {
+                    console.log(dataSet)
+                    let updatedObjects = new Set()
+                    for (vc in dataSet) {
+                        switch (dataSet[vc].comment) {
+                            case "RESET":
+                                if (dataSet[vc].message.reset)
+                                    floGlobals.appObjects[dataSet[vc].type] = dataSet[vc].message.reset;
+                                break;
+                            case "UPDATE":
+                                if (dataSet[vc].message.update)
+                                    floGlobals.appObjects[dataSet[vc].type] = mergeDiff(floGlobals
+                                        .appObjects[dataSet[vc].type], message.diff)
+                        }
+                        floGlobals.lastVC[dataSet[vc].type] = vc;
+                        updatedObjects.add(dataSet[vc].type)
+                    }
+                    updatedObjects.forEach(o => {
+                        compactIDB.writeData("appObjects", floGlobals.appObjects[o], o)
+                        compactIDB.writeData("lastVC", floGlobals.lastVC[o], o)
+                    });
+                } catch (error) {
+                    console.error(error)
+                }
+            },
+
+            storeGeneral: function(fk, dataSet) {
+                try {
+                    console.log(dataSet)
+                    if (typeof floGlobals.generalData[fk] !== "object")
+                        floGlobals.generalData[fk] = {}
+                    for (let vc in dataSet)
+                        floGlobals.generalData[fk][vc] = dataSet[vc];
+                    floGlobals.lastVC[fk] = Object.keys(floGlobals.generalData[fk]).sort().pop()
+                    compactIDB.writeData("lastVC", floGlobals.lastVC[fk], fk)
+                    compactIDB.writeData("generalData", floGlobals.generalData[fk], fk)
+                } catch (error) {
+                    console.error(error)
+                }
+            },
+
+            objectifier: function(data) {
+                if (!Array.isArray(data))
+                    data = [data];
+                return Object.fromEntries(data.map(d => {
+                    d.message = this.decodeMessage(d.message);
+                    return [d.vectorClock, d];
+                }));
+            }
+        },
+
+        //send Any message to supernode cloud storage
+        sendApplicationData: function(message, type, options = {}) {
+            return new Promise((resolve, reject) => {
+                var data = {
+                    senderID: myFloID,
+                    receiverID: options.receiverID || floGlobals.adminID,
+                    pubKey: myPubKey,
+                    message: this.util.encodeMessage(message),
+                    time: Date.now(),
+                    application: options.application || floGlobals.application,
+                    type: type,
+                    comment: options.comment || ""
+                }
+                let hashcontent = ["receiverID", "time", "application", "type", "message", "comment"]
+                    .map(d => data[d]).join("|")
+                data.sign = floCrypto.signData(hashcontent, myPrivKey)
+                this.util.singleRequest(data.receiverID, data)
+                    .then(result => resolve(result))
+                    .catch(error => reject(error))
+            })
+        },
+
+        //request any data from supernode cloud
+        requestApplicationData: function(type, options = {}) {
+            return new Promise((resolve, reject) => {
+                var request = {
+                    receiverID: options.receiverID || floGlobals.adminID,
+                    senderIDs: options.senderIDs || undefined,
+                    application: options.application || floGlobals.application,
+                    type: type,
+                    comment: options.comment || undefined,
+                    lowerVectorClock: options.lowerVectorClock || undefined,
+                    upperVectorClock: options.upperVectorClock || undefined,
+                    atVectorClock: options.atVectorClock || undefined,
+                    mostRecent: options.mostRecent || undefined,
+                }
+
+                if (options.callback instanceof Function) {
+                    this.util.liveRequest(request.receiverID, request, options.callback)
+                        .then(result => resolve(result))
+                        .catch(error => reject(error))
+                } else {
+                    if (options.method === "POST")
+                        request = {
+                            time: Date.now(),
+                            request
+                        };
+                    this.util.singleRequest(request.receiverID, request, options.method || "GET")
+                        .then(data => resolve(data)).catch(error => reject(error))
+                }
+            })
+        },
+
+        //(NEEDS UPDATE) delete data from supernode cloud (received only)
+        deleteApplicationData: function(vectorClocks, options = {}) {
+            return new Promise((resolve, reject) => {
+                var delreq = {
+                    requestorID: myFloID,
+                    pubKey: myPubKey,
+                    time: Date.now(),
+                    delete: (Array.isArray(vectorClocks) ? vectorClocks : [vectorClocks]),
+                    application: options.application || floGlobals.application
+                }
+                let hashcontent = ["time", "application", "delete"]
+                    .map(d => delreq[d]).join("|")
+                delreq.sign = floCrypto.signData(hashcontent, myPrivKey)
+                this.util.singleRequest(delreq.requestorID, delreq).then(result => {
+                    let success = [],
+                        failed = [];
+                    result.forEach(r => r.status === 'fulfilled' ?
+                        success.push(r.value) : failed.push(r.reason));
+                    resolve({
+                        success,
+                        failed
+                    })
+                }).catch(error => reject(error))
+            })
+        },
+
+        //(NEEDS UPDATE) edit comment of data in supernode cloud (mutable comments only)
+        editApplicationData: function(vectorClock, newComment, oldData, options = {}) {
+            return new Promise((resolve, reject) => {
+                let p0
+                if (!oldData) {
+                    options.atVectorClock = vectorClock;
+                    options.callback = false;
+                    p0 = this.requestApplicationData(false, options)
+                } else
+                    p0 = Promise.resolve({
+                        vectorClock: {
+                            ...oldData
+                        }
+                    })
+                p0.then(d => {
+                    if (d.senderID != myFloID)
+                        return reject("Invalid requestorID")
+                    else if (!d.comment.startsWith("EDIT:"))
+                        return reject("Data immutable")
+                    let data = {
+                        requestorID: myFloID,
+                        receiverID: d.receiverID,
+                        time: Date.now(),
+                        application: d.application,
+                        edit: {
+                            vectorClock: vectorClock,
+                            comment: newComment
+                        }
+                    }
+                    d.comment = data.edit.comment;
+                    let hashcontent = ["receiverID", "time", "application", "type", "message",
                             "comment"
                         ]
-                            .map(x => d[x]).join("|")
-                        data.edit.sign = floCrypto.signData(hashcontent, myPrivKey)
-                        this.util.singleRequest(data.receiverID, data)
-                            .then(result => resolve("Data comment updated"))
-                            .catch(error => reject(error))
+                        .map(x => d[x]).join("|")
+                    data.edit.sign = floCrypto.signData(hashcontent, myPrivKey)
+                    this.util.singleRequest(data.receiverID, data)
+                        .then(result => resolve("Data comment updated"))
+                        .catch(error => reject(error))
+                })
+            })
+        },
+
+        //mark data in supernode cloud (subAdmin access only)
+        markApplicationData: function(mark, options = {}) {
+            return new Promise((resolve, reject) => {
+                if (!floGlobals.subAdmins.includes(myFloID))
+                    return reject("Only subAdmins can mark data")
+                if (typeof mark !== "object") {
+                    if (!Array.isArray(mark)) mark = [mark];
+                    let tmp = {}
+                    mark.forEach(vc => tmp[vc] = true)
+                    mark = tmp;
+                }
+                var markreq = {
+                    receiverID: options.receiverID || floGlobals.adminID,
+                    requestorID: myFloID,
+                    pubKey: myPubKey,
+                    time: Date.now(),
+                    mark: mark,
+                    application: options.application || floGlobals.application
+                }
+                let hashcontent = ["time", "application"]
+                    .map(d => markreq[d]).join("|") + JSON.stringify(markreq.mark)
+                markreq.sign = floCrypto.signData(hashcontent, myPrivKey)
+                this.util.singleRequest(markreq.requestorID, markreq).then(result => {
+                    let success = [],
+                        failed = [];
+                    result.forEach(r => r.status === 'fulfilled' ?
+                        success.push(r.value) : failed.push(r.reason));
+                    resolve({
+                        success,
+                        failed
                     })
-                })
-            },
+                }).catch(error => reject(error))
+            })
+        },
 
-            //mark data in supernode cloud (subAdmin access only)
-            markApplicationData: function (mark, options = {}) {
-                return new Promise((resolve, reject) => {
-                    if (!floGlobals.subAdmins.includes(myFloID))
-                        return reject("Only subAdmins can mark data")
-                    if (typeof mark !== "object") {
-                        if (!Array.isArray(mark)) mark = [mark];
-                        let tmp = {}
-                        mark.forEach(vc => tmp[vc] = true)
-                        mark = tmp;
+        //send General Data
+        sendGeneralData: function(message, type, options = {}) {
+            return new Promise((resolve, reject) => {
+                if (options.encrypt) {
+                    let encryptionKey = options.encrypt === true ?
+                        floGlobals.settings.encryptionKey : options.encrypt
+                    message = floCrypto.encryptData(JSON.stringify(message), encryptionKey)
+                }
+                this.sendApplicationData(message, type, options).then(result => {
+                    //options.comment = null;
+                    //var fk = this.util.filterKey(type, options)
+                    //this.util.storeGeneral(fk, result)
+                    resolve(result)
+                }).catch(error => reject(error))
+            })
+        },
+
+        //request General Data
+        requestGeneralData: function(type, options = {}) {
+            return new Promise((resolve, reject) => {
+                var fk = this.util.filterKey(type, options)
+                options.lowerVectorClock = options.lowerVectorClock || floGlobals.lastVC[fk] + 1;
+                if (options.callback instanceof Function) {
+                    let new_options = Object.create(options)
+                    new_options.callback = (d, e) => {
+                        this.util.storeGeneral(fk, d);
+                        options.callback(d, e)
                     }
-                    var markreq = {
-                        receiverID: options.receiverID || floGlobals.adminID,
-                        requestorID: myFloID,
-                        pubKey: myPubKey,
-                        time: Date.now(),
-                        mark: mark,
-                        application: options.application || floGlobals.application
-                    }
-                    let hashcontent = ["time", "application"]
-                        .map(d => markreq[d]).join("|") + JSON.stringify(markreq.mark)
-                    markreq.sign = floCrypto.signData(hashcontent, myPrivKey)
-                    this.util.singleRequest(markreq.requestorID, markreq).then(result => {
-                        let success = [],
-                            failed = [];
-                        result.forEach(r => r.status === 'fulfilled' ?
-                            success.push(r.value) : failed.push(r.reason));
-                        resolve({
-                            success,
-                            failed
-                        })
+                    this.requestApplicationData(type, new_options)
+                        .then(result => resolve(result))
+                        .catch(error => reject(error))
+                } else {
+                    this.requestApplicationData(type, options).then(dataSet => {
+                        this.util.storeGeneral(fk, dataSet)
+                        resolve(dataSet)
                     }).catch(error => reject(error))
-                })
-            },
+                }
+            })
+        },
 
-            //send General Data
-            sendGeneralData: function (message, type, options = {}) {
-                return new Promise((resolve, reject) => {
-                    if (options.encrypt) {
-                        let encryptionKey = options.encrypt === true ?
-                            floGlobals.settings.encryptionKey : options.encrypt
-                        message = floCrypto.encryptData(JSON.stringify(message), encryptionKey)
+        //request an object data from supernode cloud
+        requestObjectData: function(objectName, options = {}) {
+            return new Promise((resolve, reject) => {
+                options.lowerVectorClock = options.lowerVectorClock || floGlobals.lastVC[objectName] +
+                    1;
+                options.senderIDs = [false, null].includes(options.senderIDs) ? null :
+                    options.senderIDs || floGlobals.subAdmins;
+                options.mostRecent = true;
+                options.comment = 'RESET';
+                let callback = null;
+                if (options.callback instanceof Function) {
+                    callback = (d, e) => {
+                        this.util.updateObject(d);
+                        options.callback(d, e);
                     }
-                    this.sendApplicationData(message, type, options).then(result => {
-                        //options.comment = null;
-                        //var fk = this.util.filterKey(type, options)
-                        //this.util.storeGeneral(fk, result)
-                        resolve(result)
-                    }).catch(error => reject(error))
-                })
-            },
-
-            //request General Data
-            requestGeneralData: function (type, options = {}) {
-                return new Promise((resolve, reject) => {
-                    var fk = this.util.filterKey(type, options)
-                    options.lowerVectorClock = options.lowerVectorClock || floGlobals.lastVC[fk] + 1;
-                    if (options.callback instanceof Function) {
+                    delete options.callback;
+                }
+                this.requestApplicationData(objectName, options).then(dataSet => {
+                    this.util.updateObject(dataSet)
+                    delete options.comment;
+                    options.lowerVectorClock = floGlobals.lastVC[objectName] + 1
+                    delete options.mostRecent;
+                    if (callback) {
                         let new_options = Object.create(options)
-                        new_options.callback = (d, e) => {
-                            this.util.storeGeneral(fk, d);
-                            options.callback(d, e)
-                        }
-                        this.requestApplicationData(type, new_options)
+                        new_options.callback = callback;
+                        this.requestApplicationData(objectName, new_options)
                             .then(result => resolve(result))
                             .catch(error => reject(error))
                     } else {
-                        this.requestApplicationData(type, options).then(dataSet => {
-                            this.util.storeGeneral(fk, dataSet)
-                            resolve(dataSet)
+                        this.requestApplicationData(objectName, options).then(dataSet => {
+                            this.util.updateObject(dataSet)
+                            this.util.lastCommit("SET", objectName)
+                            resolve(floGlobals.appObjects[objectName])
                         }).catch(error => reject(error))
                     }
-                })
-            },
+                }).catch(error => reject(error))
+            })
+        },
 
-            //request an object data from supernode cloud
-            requestObjectData: function (objectName, options = {}) {
-                return new Promise((resolve, reject) => {
-                    options.lowerVectorClock = options.lowerVectorClock || floGlobals.lastVC[objectName] +
-                        1;
-                    options.senderIDs = [false, null].includes(options.senderIDs) ? null :
-                        options.senderIDs || floGlobals.subAdmins;
-                    options.mostRecent = true;
-                    options.comment = 'RESET';
-                    let callback = null;
-                    if (options.callback instanceof Function) {
-                        callback = (d, e) => {
-                            this.util.updateObject(d);
-                            options.callback(d, e);
-                        }
-                        delete options.callback;
-                    }
-                    this.requestApplicationData(objectName, options).then(dataSet => {
-                        this.util.updateObject(dataSet)
-                        delete options.comment;
-                        options.lowerVectorClock = floGlobals.lastVC[objectName] + 1
-                        delete options.mostRecent;
-                        if (callback) {
-                            let new_options = Object.create(options)
-                            new_options.callback = callback;
-                            this.requestApplicationData(objectName, new_options)
-                                .then(result => resolve(result))
-                                .catch(error => reject(error))
-                        } else {
-                            this.requestApplicationData(objectName, options).then(dataSet => {
-                                this.util.updateObject(dataSet)
-                                this.util.lastCommit("SET", objectName)
-                                resolve(floGlobals.appObjects[objectName])
-                            }).catch(error => reject(error))
-                        }
-                    }).catch(error => reject(error))
-                })
-            },
+        closeRequest: function(requestID) {
+            return new Promise((resolve, reject) => {
+                let conn = this.util.liveRequest[requestID]
+                if (!conn)
+                    return reject('Request not found')
+                conn.onclose = evt => {
+                    delete this.util.liveRequest[requestID];
+                    resolve('Request connection closed')
+                }
+                conn.close()
+            })
+        },
 
-            closeRequest: function (requestID) {
-                return new Promise((resolve, reject) => {
-                    let conn = this.util.liveRequest[requestID]
-                    if (!conn)
-                        return reject('Request not found')
-                    conn.onclose = evt => {
-                        delete this.util.liveRequest[requestID]
-                        resolve('Request connection closed')
-                    }
-                    conn.close()
-                })
-            },
+        //reset or initialize an object and send it to cloud
+        resetObjectData: function(objectName, options = {}) {
+            return new Promise((resolve, reject) => {
+                let message = {
+                    reset: floGlobals.appObjects[objectName]
+                }
+                options.comment = 'RESET';
+                this.sendApplicationData(message, objectName, options).then(result => {
+                    this.util.lastCommit("SET", objectName)
+                    resolve(result)
+                }).catch(error => reject(error))
+            })
+        },
 
-            //reset or initialize an object and send it to cloud
-            resetObjectData: function (objectName, options = {}) {
-                return new Promise((resolve, reject) => {
-                    let message = {
-                        reset: floGlobals.appObjects[objectName]
-                    }
-                    options.comment = 'RESET';
-                    this.sendApplicationData(message, objectName, options).then(result => {
-                        this.util.lastCommit("SET", objectName)
-                        resolve(result)
-                    }).catch(error => reject(error))
-                })
-            },
+        //update the diff and send it to cloud
+        updateObjectData: function(objectName, options = {}) {
+            return new Promise((resolve, reject) => {
+                let message = {
+                    diff: findDiff(this.util.lastCommit("GET", objectName), floGlobals.appObjects[
+                        objectName])
+                }
+                options.comment = 'UPDATE';
+                this.sendApplicationData(message, objectName, options).then(result => {
+                    this.util.lastCommit("SET", objectName)
+                    resolve(result)
+                }).catch(error => reject(error))
+            })
+        }
+    }
 
-            //update the diff and send it to cloud
-            updateObjectData: function (objectName, options = {}) {
-                return new Promise((resolve, reject) => {
-                    let message = {
-                        diff: findDiff(this.util.lastCommit("GET", objectName), floGlobals.appObjects[
-                            objectName])
-                    }
-                    options.comment = 'UPDATE';
-                    this.sendApplicationData(message, objectName, options).then(result => {
-                        this.util.lastCommit("SET", objectName)
-                        resolve(result)
-                    }).catch(error => reject(error))
-                })
+    /*Kademlia DHT K-bucket implementation as a binary tree.*/
+    function BuildKBucket(options = {}) {
+        this.localNodeId = options.localNodeId || window.crypto.getRandomValues(new Uint8Array(20))
+        this.numberOfNodesPerKBucket = options.numberOfNodesPerKBucket || 20
+        this.numberOfNodesToPing = options.numberOfNodesToPing || 3
+        this.distance = options.distance || this.distance
+        this.arbiter = options.arbiter || this.arbiter
+        this.metadata = Object.assign({}, options.metadata)
+
+        this.createNode = function() {
+            return {
+                contacts: [],
+                dontSplit: false,
+                left: null,
+                right: null
             }
         }
 
-        /*Kademlia DHT K-bucket implementation as a binary tree.*/
-        function BuildKBucket(options = {}) {
-            this.localNodeId = options.localNodeId || window.crypto.getRandomValues(new Uint8Array(20))
-            this.numberOfNodesPerKBucket = options.numberOfNodesPerKBucket || 20
-            this.numberOfNodesToPing = options.numberOfNodesToPing || 3
-            this.distance = options.distance || this.distance
-            this.arbiter = options.arbiter || this.arbiter
-            this.metadata = Object.assign({}, options.metadata)
+        this.ensureInt8 = function(name, val) {
+            if (!(val instanceof Uint8Array))
+                throw new TypeError(name + ' is not a Uint8Array')
+        }
 
-            this.createNode = function () {
-                return {
-                    contacts: [],
-                    dontSplit: false,
-                    left: null,
-                    right: null
-                }
-            }
-
-            this.ensureInt8 = function (name, val) {
-                if (!(val instanceof Uint8Array))
-                    throw new TypeError(name + ' is not a Uint8Array')
-            }
-
-            this.arrayEquals = function (array1, array2) {
-                if (array1 === array2)
-                    return true
-                if (array1.length !== array2.length)
-                    return false
-                for (let i = 0, length = array1.length; i < length; ++i)
-                    if (array1[i] !== array2[i])
-                        return false
+        this.arrayEquals = function(array1, array2) {
+            if (array1 === array2)
                 return true
-            }
+            if (array1.length !== array2.length)
+                return false
+            for (let i = 0, length = array1.length; i < length; ++i)
+                if (array1[i] !== array2[i])
+                    return false
+            return true
+        }
 
-            this.ensureInt8('option.localNodeId as parameter 1', this.localNodeId)
-            this.root = this.createNode()
+        this.ensureInt8('option.localNodeId as parameter 1', this.localNodeId)
+        this.root = this.createNode()
 
-            this.arbiter = function (incumbent, candidate) {
-                return incumbent.vectorClock > candidate.vectorClock ? incumbent : candidate
-            }
+        this.arbiter = function(incumbent, candidate) {
+            return incumbent.vectorClock > candidate.vectorClock ? incumbent : candidate
+        }
 
-            this.distance = function (firstId, secondId) {
-                let distance = 0
-                let i = 0
-                const min = Math.min(firstId.length, secondId.length)
-                const max = Math.max(firstId.length, secondId.length)
-                for (; i < min; ++i)
-                    distance = distance * 256 + (firstId[i] ^ secondId[i])
-                for (; i < max; ++i) distance = distance * 256 + 255
-                return distance
-            }
+        this.distance = function(firstId, secondId) {
+            let distance = 0
+            let i = 0
+            const min = Math.min(firstId.length, secondId.length)
+            const max = Math.max(firstId.length, secondId.length)
+            for (; i < min; ++i)
+                distance = distance * 256 + (firstId[i] ^ secondId[i])
+            for (; i < max; ++i) distance = distance * 256 + 255
+            return distance
+        }
 
-            this.add = function (contact) {
-                this.ensureInt8('contact.id', (contact || {}).id)
-                let bitIndex = 0
-                let node = this.root
-                while (node.contacts === null)
-                    node = this._determineNode(node, contact.id, bitIndex++)
-                const index = this._indexOf(node, contact.id)
-                if (index >= 0) {
-                    this._update(node, index, contact)
-                    return this
-                }
-                if (node.contacts.length < this.numberOfNodesPerKBucket) {
-                    node.contacts.push(contact)
-                    return this
-                }
-                if (node.dontSplit)
-                    return this
-                this._split(node, bitIndex)
-                return this.add(contact)
-            }
-
-            this.closest = function (id, n = Infinity) {
-                this.ensureInt8('id', id)
-                if ((!Number.isInteger(n) && n !== Infinity) || n <= 0)
-                    throw new TypeError('n is not positive number')
-                let contacts = []
-                for (let nodes = [this.root], bitIndex = 0; nodes.length > 0 && contacts.length < n;) {
-                    const node = nodes.pop()
-                    if (node.contacts === null) {
-                        const detNode = this._determineNode(node, id, bitIndex++)
-                        nodes.push(node.left === detNode ? node.right : node.left)
-                        nodes.push(detNode)
-                    } else
-                        contacts = contacts.concat(node.contacts)
-                }
-                return contacts
-                    .map(a => [this.distance(a.id, id), a])
-                    .sort((a, b) => a[0] - b[0])
-                    .slice(0, n)
-                    .map(a => a[1])
-            }
-
-            this.count = function () {
-                let count = 0
-                for (const nodes = [this.root]; nodes.length > 0;) {
-                    const node = nodes.pop()
-                    if (node.contacts === null)
-                        nodes.push(node.right, node.left)
-                    else
-                        count += node.contacts.length
-                }
-                return count
-            }
-
-            this._determineNode = function (node, id, bitIndex) {
-                const bytesDescribedByBitIndex = bitIndex >> 3
-                const bitIndexWithinByte = bitIndex % 8
-                if ((id.length <= bytesDescribedByBitIndex) && (bitIndexWithinByte !== 0))
-                    return node.left
-                const byteUnderConsideration = id[bytesDescribedByBitIndex]
-                if (byteUnderConsideration & (1 << (7 - bitIndexWithinByte)))
-                    return node.right
-                return node.left
-            }
-
-            this.get = function (id) {
-                this.ensureInt8('id', id)
-                let bitIndex = 0
-                let node = this.root
-                while (node.contacts === null)
-                    node = this._determineNode(node, id, bitIndex++)
-                const index = this._indexOf(node, id)
-                return index >= 0 ? node.contacts[index] : null
-            }
-
-            this._indexOf = function (node, id) {
-                for (let i = 0; i < node.contacts.length; ++i)
-                    if (this.arrayEquals(node.contacts[i].id, id))
-                        return i
-                return -1
-            }
-
-            this.remove = function (id) {
-                this.ensureInt8('the id as parameter 1', id)
-                let bitIndex = 0
-                let node = this.root
-                while (node.contacts === null)
-                    node = this._determineNode(node, id, bitIndex++)
-                const index = this._indexOf(node, id)
-                if (index >= 0)
-                    node.contacts.splice(index, 1)[0]
+        this.add = function(contact) {
+            this.ensureInt8('contact.id', (contact || {}).id)
+            let bitIndex = 0
+            let node = this.root
+            while (node.contacts === null)
+                node = this._determineNode(node, contact.id, bitIndex++)
+            const index = this._indexOf(node, contact.id)
+            if (index >= 0) {
+                this._update(node, index, contact)
                 return this
             }
-
-            this._split = function (node, bitIndex) {
-                node.left = this.createNode()
-                node.right = this.createNode()
-                for (const contact of node.contacts)
-                    this._determineNode(node, contact.id, bitIndex).contacts.push(contact)
-                node.contacts = null
-                const detNode = this._determineNode(node, this.localNodeId, bitIndex)
-                const otherNode = node.left === detNode ? node.right : node.left
-                otherNode.dontSplit = true
+            if (node.contacts.length < this.numberOfNodesPerKBucket) {
+                node.contacts.push(contact)
+                return this
             }
-
-            this.toArray = function () {
-                let result = []
-                for (const nodes = [this.root]; nodes.length > 0;) {
-                    const node = nodes.pop()
-                    if (node.contacts === null)
-                        nodes.push(node.right, node.left)
-                    else
-                        result = result.concat(node.contacts)
-                }
-                return result
-            }
-
-            this._update = function (node, index, contact) {
-                if (!this.arrayEquals(node.contacts[index].id, contact.id))
-                    throw new Error('wrong index for _update')
-                const incumbent = node.contacts[index]
-                const selection = this.arbiter(incumbent, contact)
-                if (selection === incumbent && incumbent !== contact) return
-                node.contacts.splice(index, 1)
-                node.contacts.push(selection)
-            }
+            if (node.dontSplit)
+                return this
+            this._split(node, bitIndex)
+            return this.add(contact)
         }
-    </script>
+
+        this.closest = function(id, n = Infinity) {
+            this.ensureInt8('id', id)
+            if ((!Number.isInteger(n) && n !== Infinity) || n <= 0)
+                throw new TypeError('n is not positive number')
+            let contacts = []
+            for (let nodes = [this.root], bitIndex = 0; nodes.length > 0 && contacts.length < n;) {
+                const node = nodes.pop()
+                if (node.contacts === null) {
+                    const detNode = this._determineNode(node, id, bitIndex++)
+                    nodes.push(node.left === detNode ? node.right : node.left)
+                    nodes.push(detNode)
+                } else
+                    contacts = contacts.concat(node.contacts)
+            }
+            return contacts
+                .map(a => [this.distance(a.id, id), a])
+                .sort((a, b) => a[0] - b[0])
+                .slice(0, n)
+                .map(a => a[1])
+        }
+
+        this.count = function() {
+            let count = 0
+            for (const nodes = [this.root]; nodes.length > 0;) {
+                const node = nodes.pop()
+                if (node.contacts === null)
+                    nodes.push(node.right, node.left)
+                else
+                    count += node.contacts.length
+            }
+            return count
+        }
+
+        this._determineNode = function(node, id, bitIndex) {
+            const bytesDescribedByBitIndex = bitIndex >> 3
+            const bitIndexWithinByte = bitIndex % 8
+            if ((id.length <= bytesDescribedByBitIndex) && (bitIndexWithinByte !== 0))
+                return node.left
+            const byteUnderConsideration = id[bytesDescribedByBitIndex]
+            if (byteUnderConsideration & (1 << (7 - bitIndexWithinByte)))
+                return node.right
+            return node.left
+        }
+
+        this.get = function(id) {
+            this.ensureInt8('id', id)
+            let bitIndex = 0
+            let node = this.root
+            while (node.contacts === null)
+                node = this._determineNode(node, id, bitIndex++)
+            const index = this._indexOf(node, id)
+            return index >= 0 ? node.contacts[index] : null
+        }
+
+        this._indexOf = function(node, id) {
+            for (let i = 0; i < node.contacts.length; ++i)
+                if (this.arrayEquals(node.contacts[i].id, id))
+                    return i
+            return -1
+        }
+
+        this.remove = function(id) {
+            this.ensureInt8('the id as parameter 1', id)
+            let bitIndex = 0
+            let node = this.root
+            while (node.contacts === null)
+                node = this._determineNode(node, id, bitIndex++)
+            const index = this._indexOf(node, id)
+            if (index >= 0)
+                node.contacts.splice(index, 1)[0]
+            return this
+        }
+
+        this._split = function(node, bitIndex) {
+            node.left = this.createNode()
+            node.right = this.createNode()
+            for (const contact of node.contacts)
+                this._determineNode(node, contact.id, bitIndex).contacts.push(contact)
+            node.contacts = null
+            const detNode = this._determineNode(node, this.localNodeId, bitIndex)
+            const otherNode = node.left === detNode ? node.right : node.left
+            otherNode.dontSplit = true
+        }
+
+        this.toArray = function() {
+            let result = []
+            for (const nodes = [this.root]; nodes.length > 0;) {
+                const node = nodes.pop()
+                if (node.contacts === null)
+                    nodes.push(node.right, node.left)
+                else
+                    result = result.concat(node.contacts)
+            }
+            return result
+        }
+
+        this._update = function(node, index, contact) {
+            if (!this.arrayEquals(node.contacts[index].id, contact.id))
+                throw new Error('wrong index for _update')
+            const incumbent = node.contacts[index]
+            const selection = this.arbiter(incumbent, contact)
+            if (selection === incumbent && incumbent !== contact) return
+            node.contacts.splice(index, 1)
+            node.contacts.push(selection)
+        }
+    }
+</script>
+
     <script id="floDapps" version="2.0.1c">
         /* General functions for FLO Dapps*/
         const floDapps = {
