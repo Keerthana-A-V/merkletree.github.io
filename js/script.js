@@ -57,8 +57,8 @@ path=new Array();
                  id1.appendChild(newdiv);
         }
         //writing into cloud
-        options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:"Tree_root",comment:"Storing roothash in cloud"}
-        floCloudAPI.sendGeneralData(rootHash,"Merkle_Tree",options).then(
+        options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:rootHash,comment:"Storing roothash in cloud"}
+        floCloudAPI.sendGeneralData("Merkle_Tree","Tree_root",options).then(
             function(value){
                 console.log(value);
             },
@@ -71,7 +71,25 @@ path=new Array();
 document.getElementById("vrbtn").addEventListener('click',()=>{
     let roothash=document.getElementById("roothash").value;
 
-  console.log(floCloudAPI.requestGeneralData("Merkle_Tree",{}))
+    console.log(floCloudAPI.requestGeneralData("Tree_root",{application:roothash,message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"})
+    );
+
+
+  floCloudAPI.requestGeneralData("Tree_root",{application:roothash,message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"}).then(
+      function (value){
+          alert(value)
+          console.log(value);
+          console.log(Object.getOwnPropertyNames(value));
+          let valuelist=new Array();
+          path_string=document.getElementById("path11").value;
+          path1=path_string.split(',')
+          let verification=tree.verifyMerkleMembership(ele,roothash,path1);
+          },
+          function(error)
+      {
+        console.log(error);
+      }
+  )
 
 
     let ele=document.getElementById("ele").value;
