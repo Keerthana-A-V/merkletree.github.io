@@ -57,8 +57,8 @@ path=new Array();
                  id1.appendChild(newdiv);
         }
         //writing into cloud
-        options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:rootHash,comment:"Storing roothash in cloud"}
-        floCloudAPI.sendGeneralData("Merkle_Tree","Tree_root",options).then(
+        options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",comment:"Storing roothash in cloud"}
+        floCloudAPI.sendGeneralData("Merkle_Tree",rootHash,options).then(
             function(value){
                 console.log(value);
             },
@@ -67,31 +67,38 @@ path=new Array();
             })
         }
     //verify path
+/*
+                To check the presence of the roothash
+Object.getOwnPropertyNames(q["b7da912a7ab69b1330110f374079630e0b89c3c4b360ed741640126a9833614f|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|Tree_root"])
+*/
+
+/*if(Object.getOwnPropertyNames(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])!=null){alert(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])}
+undefined
+if(Object.getOwnPropertyNames(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])!=null){console.log(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])} */
+
 
 document.getElementById("vrbtn").addEventListener('click',()=>{
     let roothash=document.getElementById("roothash").value;
-
-    console.log(floCloudAPI.requestGeneralData("Tree_root",{application:roothash,message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"})
+    floCloudAPI.requestGeneralData(roothash,{message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"}).then(
+        function (value){
+            console.log(value);
+            let q=floGlobals.generalData;
+            console.log(q);
+            console.log(Object.getOwnPropertyNames(q));
+            if(q[roothash|"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"|"Merkle_Tree"]!=""){
+                console.log("Available and path can be found");
+            }else{
+                console.log("Not available");
+            }
+            },
+            function(error)
+        {
+          console.log(error);
+        }
+    
     );
 
-
-  floCloudAPI.requestGeneralData("Tree_root",{application:roothash,message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"}).then(
-      function (value){
-          alert(value)
-          console.log(value);
-          console.log(Object.getOwnPropertyNames(value));
-          let valuelist=new Array();
-          path_string=document.getElementById("path11").value;
-          path1=path_string.split(',')
-          let verification=tree.verifyMerkleMembership(ele,roothash,path1);
-          },
-          function(error)
-      {
-        console.log(error);
-      }
-  )
-
-
+        //To check the path can be constructed using the roothash
     let ele=document.getElementById("ele").value;
     tree=new MerkleTree(trlist);
     path_string=document.getElementById("path11").value;
