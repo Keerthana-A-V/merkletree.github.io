@@ -57,10 +57,10 @@ path=new Array();
                  id1.appendChild(newdiv);
         }
         //writing into cloud
-        options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",comment:"Storing roothash in cloud"}
+        options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",comment:"Storing roothash in cloud",application:"Tree_root"}
         floCloudAPI.sendGeneralData("Merkle_Tree",rootHash,options).then(
             function(value){
-                console.log(value);
+                console.log("Written into Cloud");
             },
             function(error){
                 console.log(error);
@@ -74,22 +74,99 @@ Object.getOwnPropertyNames(q["b7da912a7ab69b1330110f374079630e0b89c3c4b360ed7416
 
 /*if(Object.getOwnPropertyNames(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])!=null){alert(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])}
 undefined
-if(Object.getOwnPropertyNames(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])!=null){console.log(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])} */
+if(Object.getOwnPropertyNames(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])!=null){console.log(q["Merkle_Tree|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|TEST_MODE"])}
+
+FLO Dapps
+
+p=floDapps.getNextGeneralData("b7ad912a7ab69b1330110f374079630e0b89c3c4b360ed741640126a9833614f")
+{}
+Object.getOwnPropertyNames(p)
+[]length: 0[[Prototype]]: Array(0)
+floDapps.getNextGeneralData("b7ad912a7ab69b1330110f374079630e0b89c3c4b360ed741640126a9833614f").hasOwnProperty("b7ad912a7ab69b1330110f374079630e0b89c3c4b360ed741640126a9833614f")
+false
+floDapps.getNextGeneralData().hasOwnProperty("b7ad912a7ab69b1330110f374079630e0b89c3c4b360ed741640126a9833614f")
+*/
+
+
+
+
+
+
 
 
 document.getElementById("vrbtn").addEventListener('click',()=>{
-    let roothash=document.getElementById("roothash").value;
-    floCloudAPI.requestGeneralData(roothash,{message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"}).then(
+    let roothash=document.getElementById("roothash1").value;
+   if(floCloudAPI.requestGeneralData(roothash,{message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:"Tree_root"})==roothash.concat("|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|Tree_root")){
+       alert("Available")
+   }else{
+       alert("NA")
+   }
+   /*.then(
+       function(value){
+           q=floGlobals.generalData;
+        w=new Array();
+        w= Object.entries(q);
+        console.log(w);
+        let checker=roothash.concat("|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|Tree_root")
+        for(let i=0;i<w.length;i++){
+            for(let j=0;j<w[i].length;j++){
+            if(w[i][j]==checker){
+                alert("Did it")
+                console.log(w[i][j])
+            }}
+        }*/
+     /*   let hash="|";
+        let rid=hash.concat("FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf");
+        let ty=hash.concat("Tree_root");
+        let checker=roothash.concat(rid,ty);
+        for(let i=0;i<q.length;i++){
+        if(Object.getOwnPropertyNames(value)==checker){
+            console.log(checker);
+            console.log("Available")
+        }
+        else{
+            console.log(checker);
+            console.log("Not Available")
+        }
+
+    }*/
+       }/*,
+       function(error){
+       console.log(error)
+       }
+   )
+}*/)
+
+
+
+
+
+
+
+
+/*document.getElementById("vrbtn").addEventListener('click',()=>{
+    let roothash=document.getElementById("roothash1").value;
+    floCloudAPI.requestGeneralData(roothash,{message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:"Tree_root"}).then(
         function (value){
-            console.log(value);
+             let hash="|";
+             let rid=hash.concat("FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf");
+            // alert(rid);
+             let ty=hash.concat("Tree_root");
+            // alert(ty);
+             let checker=roothash.concat(rid,ty);
+            // alert(checker);
             let q=floGlobals.generalData;
-            console.log(q);
-            console.log(Object.getOwnPropertyNames(q));
-            if(q[roothash|"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf"|"Merkle_Tree"]!=""){
-                console.log("Available and path can be found");
-            }else{
-                console.log("Not available");
-            }
+            console.log(checker);
+                if(Object.getOwnPropertyNames(q).includes(checker)){
+                    alert("This is the index : "+Object.getOwnPropertyNames(q).indexOf(checker))
+                    pathchecker()
+                    console.log("Available");
+                }
+                else{
+                    document.getElementById("otp2").innerHTML="<span class='otpver'><b style='color:black;'>The Root ' " +roothash+" is not present in the cloud!!</span>";
+                    console.log("Not available");
+                }
+            
             },
             function(error)
         {
@@ -99,6 +176,7 @@ document.getElementById("vrbtn").addEventListener('click',()=>{
     );
 
         //To check the path can be constructed using the roothash
+        function pathchecker(){
     let ele=document.getElementById("ele").value;
     tree=new MerkleTree(trlist);
     path_string=document.getElementById("path11").value;
@@ -110,8 +188,8 @@ document.getElementById("vrbtn").addEventListener('click',()=>{
     else{
         document.getElementById("otp2").innerHTML="<span class='otpver'><b style='color:black;'>FALSE!, ' "+ele+" ' is NOT PRESENT in</b> ' "+roothash+" ' !</span>";
 
-    }
-})
+    }}
+})*/
 
 
 
