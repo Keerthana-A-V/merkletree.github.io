@@ -39,6 +39,7 @@ path=new Array();
         newdiv.value=rootHash;
         id1.appendChild(newdiv);
 
+
               //path
     for(let i=0;i<trlist.length;i++){
         //let path[i] = tree.getHashPathToRoot(trlist[i]);
@@ -56,15 +57,28 @@ path=new Array();
                  newdiv.value=path[i];
                  id1.appendChild(newdiv);
         }
-        //writing into cloud
-        options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",comment:"Storing roothash in cloud",application:"Tree_root"}
-        floCloudAPI.sendGeneralData("Merkle_Tree",rootHash,options).then(
-            function(value){
-                console.log("Written into Cloud");
-            },
-            function(error){
-                console.log(error);
-            })
+       
+        
+         //writing into cloud
+         options={receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",comment:"Storing roothash in cloud",application:"Tree_root"}
+         floCloudAPI.sendGeneralData("Merkle_Tree",rootHash,options).then(
+             function(value){
+                 let val=value;
+                 let arr=new Array();
+                 arr=Object.entries(val);
+                 document.getElementById('otp3').innerHTML="<b style='color:black'>Unique ID : ";
+                 var id1=document.querySelector("#otp3");
+                 var newdiv= document.createElement('sm-copy')
+                  newdiv.value=arr[0][0];
+                  id1.appendChild(newdiv);
+                 
+                 console.log("Written into Cloud");
+                
+                 },
+             function(error){
+                 console.log(error);
+             })
+
         }
     //verify path
 /*
@@ -96,11 +110,41 @@ floDapps.getNextGeneralData().hasOwnProperty("b7ad912a7ab69b1330110f374079630e0b
 
 document.getElementById("vrbtn").addEventListener('click',()=>{
     let roothash=document.getElementById("roothash1").value;
-   if(floCloudAPI.requestGeneralData(roothash,{message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:"Tree_root"})==roothash.concat("|FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf|Tree_root")){
-       alert("Available")
-   }else{
-       alert("NA")
+   floCloudAPI.requestGeneralData(roothash,{message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:"Tree_root"}).then(
+       function(value){
+           getfrmcloud()
+       },
+       function(error){
+           console.log(error)
+       }
+   )
+
+   function getfrmcloud(){
+    let i=0;
+    let res=0;
+     let unqid=document.getElementById('uniqid').value;
+    let d=new Array();
+    let x=new Array();
+    let y=new Array();
+ w=floDapps.getNextGeneralData(roothash);
+ d=(Object.getOwnPropertyNames(w));
+y= Object.values(d);
+
+ for(i=0;i<y.length;x++){
+     if(y[i]==unqid){
+         res=1;
+     }else{
+         res=0;
+     }
+ }
+ if(res==1){
+     document.getElementById("otp2").innerHTML="<span class='otpver'><b style='color:black;'>The Root ' " +roothash+"  present in the cloud!!</span>";
+
+ }else{
+     document.getElementById("otp2").innerHTML="<span class='otpver'><b style='color:black;'>The Root ' " +roothash+" is not present in the cloud!!</span>";
+ }
    }
+
    /*.then(
        function(value){
            q=floGlobals.generalData;
@@ -194,4 +238,10 @@ document.getElementById("vrbtn").addEventListener('click',()=>{
 
 
 
-
+/* 
+p=floDapps.getNextGeneralData("b7ad912a7ab69b1330110f374079630e0b89c3c4b360ed741640126a9833614f")
+p["1631861808914_FLRWYmzuew3Xr9cayG94PzgDD9WSBJvqde"]
+p[9]
+r=Object.getOwnPropertyNames(p)
+r[0]
+*/

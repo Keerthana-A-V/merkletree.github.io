@@ -18,14 +18,14 @@ sm-button{
 .block{
     display:block;
 }
-#otp{
+#otp,#otp3{
     margin-left: 15%;
     margin-right: 15%;}
 .otpstyle{
     color: gray;
     font-weight: bold;
 }
-#otp2{
+#otp2 {
     margin-left: 20%;
     margin-right: 20%;
 }
