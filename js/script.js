@@ -45,14 +45,16 @@ path=new Array();
         //let path[i] = tree.getHashPathToRoot(trlist[i]);
         path.push(tree.getHashPathToRoot(trlist[i]));
         }
+        otp1.classList.add("scroll");
+
         for(let i=0;i<trlist.length;i++){
 
-                var id1=document.querySelector("#otp");
+                var id1=document.querySelector("#otp1");
                 var newdiv1= document.createElement('div')
                  newdiv1.innerHTML="<br><b style='color:black'>path["+trlist[i]+"] =</b> ";
                  id1.appendChild(newdiv1);
 
-                var id1=document.querySelector("#otp");
+                var id1=document.querySelector("#otp1");
                 var newdiv= document.createElement('sm-copy')
                  newdiv.value=path[i];
                  id1.appendChild(newdiv);
@@ -83,6 +85,7 @@ path=new Array();
     //verify path
 
 document.getElementById("vrbtn").addEventListener('click',()=>{
+    document.getElementById('otp2').innerHTML='<sm-spinner class="spinner"></sm-spinner>'
     let roothash=document.getElementById("roothash1").value;
    floCloudAPI.requestApplicationData(roothash,{message:"Merkle_Tree",receiverID:"FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",application:"Tree_root"}).then(
        function(value){
@@ -117,7 +120,7 @@ document.getElementById("vrbtn").addEventListener('click',()=>{
 
 
         }else{
-            document.getElementById("otp2").innerHTML="<span class='otpver'><b style='color:black;'>The Root ' " +roothash+" is not present in the cloud!!</span>";
+            document.getElementById("otp2").innerHTML="<span class='otpver'><b style='color:black;'>The Root ' " +roothash+" ' is not present in the cloud!!</span>";
         }
        },
        function(error){
