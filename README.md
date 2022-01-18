@@ -1,4 +1,4 @@
-# merkletree.github.io
+
 # To create Merkle tree
 To create a Merkle Tree enter transaction IDseparated by commas(,)
 Root and path will be displayed for the same.
